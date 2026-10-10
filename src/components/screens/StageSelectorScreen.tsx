@@ -273,7 +273,17 @@ export const StageSelectorScreen: React.FC = () => {
 
               <div className="space-y-2">
                 {OFFICIAL_MASTERY_SKILLS.map((skill) => {
-                  const isDone = isStage1Completed;
+                  // Map skills to specific tutorial steps
+                  const skillStepMapping: Record<string, number> = {
+                    skill_1: 0,
+                    skill_2: 6,
+                    skill_3: 0,
+                    skill_4: 1,
+                    skill_5: 3,
+                    skill_6: 5,
+                  };
+                  const stepIndex = skillStepMapping[skill.id] ?? 0;
+                  const isDone = profile.completedTutorialSteps.includes(stepIndex);
                   return (
                     <div
                       key={skill.id}

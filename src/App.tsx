@@ -5,7 +5,7 @@
  * Digital Technology 3 — Unit 1: Project Planning
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense, lazy } from 'react';
 import { ProjectProvider, useProject } from './context/ProjectContext';
 import { WelcomeScreen } from './components/screens/WelcomeScreen';
 import { NameInputScreen } from './components/screens/NameInputScreen';
@@ -14,15 +14,16 @@ import { TopMenu } from './components/layout/TopMenu';
 import { Toolbar } from './components/layout/Toolbar';
 import { TaskTable } from './components/table/TaskTable';
 import { GanttChart } from './components/gantt/GanttChart';
-import { ResourcesView } from './components/views/ResourcesView';
-import { TaskPropertiesModal } from './components/modals/TaskPropertiesModal';
-import { ProjectPropertiesModal } from './components/modals/ProjectPropertiesModal';
-import { ResourcesModal } from './components/modals/ResourcesModal';
-import { AboutModal } from './components/modals/AboutModal';
-import { BeeAssistantPanel } from './components/assistant/BeeAssistantPanel';
-import { StageAssistantWidget } from './components/assistant/StageAssistantWidget';
-import { InteractiveOnboardingTour } from './components/assistant/InteractiveOnboardingTour';
-import { StepDetailModal } from './components/assistant/StepDetailModal';
+// Lazy loaded components
+const ResourcesView = lazy(() => import('./components/views/ResourcesView').then(m => ({ default: m.ResourcesView })));
+const TaskPropertiesModal = lazy(() => import('./components/modals/TaskPropertiesModal').then(m => ({ default: m.TaskPropertiesModal })));
+const ProjectPropertiesModal = lazy(() => import('./components/modals/ProjectPropertiesModal').then(m => ({ default: m.ProjectPropertiesModal })));
+const ResourcesModal = lazy(() => import('./components/modals/ResourcesModal').then(m => ({ default: m.ResourcesModal })));
+const AboutModal = lazy(() => import('./components/modals/AboutModal').then(m => ({ default: m.AboutModal })));
+const BeeAssistantPanel = lazy(() => import('./components/assistant/BeeAssistantPanel').then(m => ({ default: m.BeeAssistantPanel })));
+const StageAssistantWidget = lazy(() => import('./components/assistant/StageAssistantWidget').then(m => ({ default: m.StageAssistantWidget })));
+const InteractiveOnboardingTour = lazy(() => import('./components/assistant/InteractiveOnboardingTour').then(m => ({ default: m.InteractiveOnboardingTour })));
+const StepDetailModal = lazy(() => import('./components/assistant/StepDetailModal').then(m => ({ default: m.StepDetailModal })));
 import { BarChart3, Users, Calendar, Layers, Sparkles, User } from 'lucide-react';
 
 function GanttAppContent() {
@@ -248,7 +249,9 @@ function GanttAppContent() {
             </div>
           </>
         ) : (
-          <ResourcesView />
+          <Suspense fallback={null}>
+            <ResourcesView />
+          </Suspense>
         )}
       </div>
 
@@ -296,50 +299,52 @@ function GanttAppContent() {
       )}
 
       {/* Modals */}
-      <TaskPropertiesModal
-        isOpen={isTaskPropsOpen}
-        onClose={() => setIsTaskPropsOpen(false)}
-      />
+      <Suspense fallback={null}>
+        <TaskPropertiesModal
+          isOpen={isTaskPropsOpen}
+          onClose={() => setIsTaskPropsOpen(false)}
+        />
 
-      <ProjectPropertiesModal
-        isOpen={isProjectPropsOpen}
-        onClose={() => setIsProjectPropsOpen(false)}
-      />
+        <ProjectPropertiesModal
+          isOpen={isProjectPropsOpen}
+          onClose={() => setIsProjectPropsOpen(false)}
+        />
 
-      <ResourcesModal
-        isOpen={isResourcesOpen}
-        onClose={() => setIsResourcesOpen(false)}
-      />
+        <ResourcesModal
+          isOpen={isResourcesOpen}
+          onClose={() => setIsResourcesOpen(false)}
+        />
 
-      <AboutModal
-        isOpen={isAboutOpen}
-        onClose={() => setIsAboutOpen(false)}
-      />
+        <AboutModal
+          isOpen={isAboutOpen}
+          onClose={() => setIsAboutOpen(false)}
+        />
 
-      <BeeAssistantPanel
-        isOpen={isAssistantOpen}
-        onClose={() => setIsAssistantOpen(false)}
-        onOpenTaskProps={() => setIsTaskPropsOpen(true)}
-        onOpenProjectProps={() => setIsProjectPropsOpen(true)}
-        onOpenResources={() => {
-          setActiveWorkspaceTab('resources');
-          setIsResourcesOpen(true);
-        }}
-        onOpenStepModal={() => setIsStepDetailOpen(true)}
-      />
+        <BeeAssistantPanel
+          isOpen={isAssistantOpen}
+          onClose={() => setIsAssistantOpen(false)}
+          onOpenTaskProps={() => setIsTaskPropsOpen(true)}
+          onOpenProjectProps={() => setIsProjectPropsOpen(true)}
+          onOpenResources={() => {
+            setActiveWorkspaceTab('resources');
+            setIsResourcesOpen(true);
+          }}
+          onOpenStepModal={() => setIsStepDetailOpen(true)}
+        />
 
-      <StepDetailModal
-        isOpen={isStepDetailOpen}
-        onClose={() => setIsStepDetailOpen(false)}
-        stepIndex={profile.tutorialStepIndex}
-      />
+        <StepDetailModal
+          isOpen={isStepDetailOpen}
+          onClose={() => setIsStepDetailOpen(false)}
+          stepIndex={profile.tutorialStepIndex}
+        />
 
-      <InteractiveOnboardingTour
-        isOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
-        onOpenProjectProps={() => setIsProjectPropsOpen(true)}
-        onOpenTaskProps={() => setIsTaskPropsOpen(true)}
-      />
+        <InteractiveOnboardingTour
+          isOpen={isTourOpen}
+          onClose={() => setIsTourOpen(false)}
+          onOpenProjectProps={() => setIsProjectPropsOpen(true)}
+          onOpenTaskProps={() => setIsTaskPropsOpen(true)}
+        />
+      </Suspense>
     </div>
   );
 }

@@ -37,6 +37,4 @@
   font-variant-numeric: tabular-nums;
 }
 
-div#root > div > div:nth-of-type(8) > div:nth-of-type(2) {
-  display: none !important;
-}
+

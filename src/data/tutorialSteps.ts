@@ -71,9 +71,9 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     validate: (state) => {
       const script = state.tasks.find((t) => t.id === 'task_script');
       if (!script) return false;
-      return script.duration !== 5 && script.priority !== 'Normal';
+      return script.duration === 7 && (script.priority === 'High' || script.priority === 'Highest');
     },
-    getPedagogicalError: () => 'لم تُكمل تعديل المهمة بعد. غيّر مدة «السيناريو» من 5 أيام، وعدّل أولويتها من «عادي» إلى أولوية مناسبة، ثم تحقق مجددًا.',
+    getPedagogicalError: () => 'يجب ضبط مدة مهمة «السيناريو» لتكون 7 أيام، وتغيير الأولوية إلى «عالية» (High) أو «قصوى» (Highest).',
   },
   {
     id: 3,
@@ -160,9 +160,9 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       const reh = state.tasks.find((t) => t.id === 'task_rehearsals');
       const lights = state.tasks.find((t) => t.id === 'task_lights');
       if (!reh || !lights) return false;
-      return reh.duration !== 4 && lights.duration !== 2;
+      return reh.duration === 6 && lights.duration === 3;
     },
-    getPedagogicalError: () => 'عدّل مدتي المهمتين معًا: «البروفات» من 4 أيام، و«الأضواء» من يومين، ثم تحقق مجددًا.',
+    getPedagogicalError: () => 'عدّل مدتي المهمتين معًا: «البروفات» لتكون 6 أيام، و«الأضواء» لتكون 3 أيام، ثم تحقق مجددًا.',
   },
   {
     id: 6,
@@ -178,9 +178,9 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     whereText: 'تبويب "الموارد وفريق العمل (Resources)".',
     howText: 'مراجعة وإضافة الموارد المرتبطة بالمسرحية.',
     validate: (state) => {
-      return state.resources.length > 4 || state.resources.some((r) => !['res_mohammed', 'res_ahmed', 'res_bilal', 'res_saad'].includes(r.id));
+      return state.resources.length >= 6;
     },
-    getPedagogicalError: () => 'تأكد من إضافة موارد جديدة تزيد عن الموارد الاربع الابتدائية في تبويب الموارد.',
+    getPedagogicalError: () => 'تأكد من إضافة موارد جديدة ليصبح العدد الإجمالي للفريق 6 موارد على الأقل في تبويب الموارد.',
   },
   {
     id: 7,
@@ -218,7 +218,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     whereText: 'خصائص المهمة (تبويب الموارد).',
     howText: 'تخصيص مورد لمهمة في المشروع.',
     validate: (state) => {
-      if (!state.assignments || state.assignments.length === 0) return false;
+      if (!state.assignments || state.assignments.length < 2) return false;
       return state.assignments.some((a) => {
         const taskExists = state.tasks.some((t) => t.id === a.taskId);
         const resourceExists = state.resources.some((r) => r.id === a.resourceId);
@@ -226,7 +226,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
         return taskExists && resourceExists && validUnit;
       });
     },
-    getPedagogicalError: () => 'يجب تخصيص مورد صالح وموجود لمهمة موجودة في المشروع بنسبة تخصيص صحيحة.',
+    getPedagogicalError: () => 'يجب تخصيص موردين على الأقل لمهام المشروع بشكل صحيح.',
   },
   {
     id: 9,

@@ -404,6 +404,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                   {/* Column 8: Progress */}
                   <td className="px-1 text-center border-l-0 whitespace-nowrap overflow-hidden">
                     <div className="flex items-center justify-center gap-1 font-mono text-[10px] tabular-nums">
+                      {task.deadline && task.endDate > task.deadline && task.progress < 100 && (
+                        <AlertCircle className="w-3.5 h-3.5 text-red-500" title="المهمة متأخرة عن الموعد النهائي!" />
+                      )}
                       <div className="w-10 h-2 bg-[#E2E8F0] rounded-xs overflow-hidden border border-[#CBD5E1]">
                         <div
                           className="h-full bg-[#2563EB]"

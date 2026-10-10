@@ -126,6 +126,7 @@ export function sanitizeAndValidateProjectJSON(input: unknown): ValidationResult
       summary: Boolean(item.summary),
       color: typeof item.color === 'string' ? item.color : undefined,
       notes: typeof item.notes === 'string' ? item.notes : '',
+      deadline: typeof item.deadline === 'string' && isValidDateString(item.deadline.trim()) ? item.deadline.trim() : null,
     });
   });
 

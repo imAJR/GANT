@@ -51,6 +51,7 @@ export const TaskPropertiesModal: React.FC<TaskPropertiesModalProps> = ({ isOpen
   const [formPriority, setFormPriority] = useState<PriorityLevel>('Normal');
   const [formProgress, setFormProgress] = useState(0);
   const [formMilestone, setFormMilestone] = useState(false);
+  const [formDeadline, setFormDeadline] = useState<string | null>(null);
   const [formParentId, setFormParentId] = useState<string | null>(null);
   const [formNotes, setFormNotes] = useState('');
 
@@ -76,6 +77,7 @@ export const TaskPropertiesModal: React.FC<TaskPropertiesModalProps> = ({ isOpen
       setFormPriority(currentTask.priority);
       setFormProgress(currentTask.progress);
       setFormMilestone(currentTask.milestone);
+      setFormDeadline(currentTask.deadline);
       setFormParentId(currentTask.parentId);
       setFormNotes(currentTask.notes || '');
     }
@@ -113,6 +115,7 @@ export const TaskPropertiesModal: React.FC<TaskPropertiesModalProps> = ({ isOpen
       priority: formPriority,
       progress: formProgress,
       milestone: formMilestone,
+      deadline: formDeadline,
       notes: formNotes,
     });
 
@@ -355,6 +358,18 @@ export const TaskPropertiesModal: React.FC<TaskPropertiesModalProps> = ({ isOpen
               </div>
 
               {/* Notes */}
+              {/* Notes */}
+              <div>
+                <label className="block text-[#475569] font-semibold text-[11px] mb-1">
+                  الموعد النهائي (Deadline):
+                </label>
+                <input
+                  type="date"
+                  value={formDeadline || ''}
+                  onChange={(e) => setFormDeadline(e.target.value || null)}
+                  className="w-full bg-white border border-[#CBD5E1] rounded px-2.5 py-1 text-xs font-mono text-[#0F172A] focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
+                />
+              </div>
               <div>
                 <label className="block text-[#475569] font-semibold text-[11px] mb-1">
                   ملاحظات المهمة (Notes):

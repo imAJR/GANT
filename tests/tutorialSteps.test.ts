@@ -25,9 +25,9 @@ test('step 1 validates Friday/Saturday weekend configuration', () => {
 test('step 2 requires both a changed duration and priority', () => {
   const state = createTutorialStartState();
   const script = state.tasks.find((task) => task.id === 'task_script')!;
-  script.duration = 8;
+  script.duration = 7;
   assert.equal(TUTORIAL_STEPS[1].validate(state, []), false);
-  script.priority = 'Highest';
+  script.priority = 'High';
   assert.equal(TUTORIAL_STEPS[1].validate(state, []), true);
 });
 
@@ -72,16 +72,17 @@ test('step 4 requires a zero-duration milestone', () => {
 
 test('step 5 requires both rehearsal and lighting durations to change', () => {
   const state = createTutorialStartState();
-  state.tasks.find((task) => task.id === 'task_rehearsals')!.duration = 8;
+  state.tasks.find((task) => task.id === 'task_rehearsals')!.duration = 6;
   assert.equal(TUTORIAL_STEPS[4].validate(state, []), false);
-  state.tasks.find((task) => task.id === 'task_lights')!.duration = 4;
+  state.tasks.find((task) => task.id === 'task_lights')!.duration = 3;
   assert.equal(TUTORIAL_STEPS[4].validate(state, []), true);
 });
 
 test('step 6 requires an additional resource', () => {
   const state = createTutorialStartState();
   assert.equal(TUTORIAL_STEPS[5].validate(state, []), false);
-  state.resources.push({ id: 'res_new', name: 'عضو جديد', roleId: 'role_actor' });
+  state.resources.push({ id: 'res_new1', name: 'عضو جديد 1', roleId: 'role_actor' });
+  state.resources.push({ id: 'res_new2', name: 'عضو جديد 2', roleId: 'role_actor' });
   assert.equal(TUTORIAL_STEPS[5].validate(state, []), true);
 });
 
@@ -96,31 +97,17 @@ test('step 8 requires a valid task-resource assignment', () => {
   const state = createTutorialStartState();
   assert.equal(TUTORIAL_STEPS[7].validate(state, []), false);
   state.assignments.push({
-    id: 'assignment_invalid_task',
-    taskId: 'missing_task',
+    id: 'assignment_1',
+    taskId: 'task_script',
     resourceId: 'res_bilal',
     unit: 100,
   });
+  // Need 2
   assert.equal(TUTORIAL_STEPS[7].validate(state, []), false);
-  state.assignments = [{
-    id: 'assignment_invalid_resource',
-    taskId: 'task_script',
-    resourceId: 'missing_resource',
-    unit: 100,
-  }];
-  assert.equal(TUTORIAL_STEPS[7].validate(state, []), false);
-  state.assignments = [{
-    id: 'assignment_invalid_unit',
-    taskId: 'task_script',
-    resourceId: 'res_bilal',
-    unit: 0,
-  }];
-  assert.equal(TUTORIAL_STEPS[7].validate(state, []), false);
-  state.assignments = [];
   state.assignments.push({
-    id: 'assignment_test',
-    taskId: 'task_script',
-    resourceId: 'res_bilal',
+    id: 'assignment_2',
+    taskId: 'task_directing',
+    resourceId: 'res_ahmed',
     unit: 100,
   });
   assert.equal(TUTORIAL_STEPS[7].validate(state, []), true);

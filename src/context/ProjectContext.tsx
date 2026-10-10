@@ -275,6 +275,9 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   const importProjectJSON = useCallback((jsonStr: string): boolean => {
     try {
       const parsed = JSON.parse(jsonStr);
+      if (parsed && typeof parsed === 'object' && 'profile' in parsed) {
+        delete parsed.profile;
+      }
       const validated = sanitizeAndValidateProjectJSON(parsed);
       if (validated.isValid && validated.sanitizedState) {
         commitChange(() => validated.sanitizedState!);
@@ -357,6 +360,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
         progress: 0,
         milestone: false,
         summary: false,
+        deadline: null,
       };
 
       const nextTasks = [...prev.tasks];

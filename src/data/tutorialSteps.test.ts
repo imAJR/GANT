@@ -45,9 +45,9 @@ describe('Tutorial Steps Pedagogical Validation (All 10 Steps)', () => {
     let computed = computeProjectSchedule(state.tasks, state.dependencies, state.project);
     expect(step2.validate(state, computed)).toBe(false);
 
-    // Modify script duration and priority (both required by updated curriculum validation)
+    // Modify script duration and priority
     const script = state.tasks.find((t) => t.id === 'task_script')!;
-    script.duration = 6;
+    script.duration = 7;
     script.priority = 'High';
     computed = computeProjectSchedule(state.tasks, state.dependencies, state.project);
     expect(step2.validate(state, computed)).toBe(true);
@@ -88,9 +88,9 @@ describe('Tutorial Steps Pedagogical Validation (All 10 Steps)', () => {
     expect(step5.validate(state, computed)).toBe(false);
 
     const rehearsals = state.tasks.find((t) => t.id === 'task_rehearsals')!;
-    rehearsals.duration = 8;
+    rehearsals.duration = 6;
     const lights = state.tasks.find((t) => t.id === 'task_lights')!;
-    lights.duration = 4;
+    lights.duration = 3;
     expect(step5.validate(state, computed)).toBe(true);
   });
 
@@ -101,6 +101,7 @@ describe('Tutorial Steps Pedagogical Validation (All 10 Steps)', () => {
     expect(step6.validate(state, computed)).toBe(false);
 
     state.resources.push({ id: 'res_zayd', name: 'زيد', roleId: 'role_actor' });
+    state.resources.push({ id: 'res_omar', name: 'عمر', roleId: 'role_actor' });
     expect(step6.validate(state, computed)).toBe(true);
   });
 
@@ -125,6 +126,12 @@ describe('Tutorial Steps Pedagogical Validation (All 10 Steps)', () => {
       id: 'asgn_1',
       taskId: 'task_directing',
       resourceId: 'res_saad',
+      unit: 100,
+    });
+    state.assignments.push({
+      id: 'asgn_2',
+      taskId: 'task_music',
+      resourceId: 'res_mohammed',
       unit: 100,
     });
     expect(step8.validate(state, computed)).toBe(true);

@@ -37,7 +37,7 @@ interface TopMenuProps {
   onOpenResources: () => void;
   onOpenAssistant: () => void;
   onOpenAbout: () => void;
-  onOpenTour: () => void;
+  onOpenTour?: () => void;
 }
 
 export const TopMenu: React.FC<TopMenuProps> = ({

@@ -22,6 +22,7 @@ import {
   GripVertical,
   CornerDownRight,
   Sparkles,
+  AlertCircle,
 } from 'lucide-react';
 import { useProject } from '../../context/ProjectContext';
 import { PriorityLevel } from '../../types/project';
@@ -58,6 +59,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
     addTask,
     reorderTasks,
     activeTargetTaskId,
+    activeHighlightTargetId,
   } = useProject();
 
   const [editingField, setEditingField] = useState<{ taskId: string; field: string } | null>(null);
@@ -241,7 +243,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
           <tbody className="divide-y divide-[#E2E8F0]">
             {visibleTasks.map((task, idx) => {
               const isSelected = task.id === selectedTaskId;
-              const isTargeted = task.id === activeTargetTaskId;
+              const isTargeted = task.id === activeTargetTaskId || activeHighlightTargetId === `row-${task.id}`;
               const hasChildren = task.hasChildren;
               const isCollapsed = collapsedIds.includes(task.id);
               const isEditingName = editingField?.taskId === task.id && editingField?.field === 'name';
@@ -405,7 +407,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({
                   <td className="px-1 text-center border-l-0 whitespace-nowrap overflow-hidden">
                     <div className="flex items-center justify-center gap-1 font-mono text-[10px] tabular-nums">
                       {task.deadline && task.endDate > task.deadline && task.progress < 100 && (
-                        <AlertCircle className="w-3.5 h-3.5 text-red-500" title="المهمة متأخرة عن الموعد النهائي!" />
+                        <span title="المهمة متأخرة عن الموعد النهائي!">
+                          <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                        </span>
                       )}
                       <div className="w-10 h-2 bg-[#E2E8F0] rounded-xs overflow-hidden border border-[#CBD5E1]">
                         <div

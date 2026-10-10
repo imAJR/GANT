@@ -44,7 +44,11 @@ export const StageSelectorScreen: React.FC = () => {
       isUnlocked: true,
       isCompleted: isStage1Completed,
       progressInfo: `${profile.completedTutorialSteps.length}/10 خطوات مكتملة`,
-      actionLabel: isStage1Completed ? 'مراجعة المرحلة 1' : 'ابدأ المرحلة 1',
+      actionLabel: isStage1Completed
+        ? 'مراجعة المرحلة 1 (مكتملة ✓)'
+        : profile.completedTutorialSteps.length > 0
+        ? `متابعة التعلم (الخطوة ${profile.tutorialStepIndex + 1} من 10)`
+        : 'ابدأ المرحلة 1 (الخطوة 1)',
     },
     {
       stage: 2 as const,
@@ -54,8 +58,8 @@ export const StageSelectorScreen: React.FC = () => {
       description: 'نفذ أهداف مشروع المسرحية المدرسية بنفسك دون إرشاد تفصيلي مستمر، واكتشف الأدوات لحل التحديات وإتقان التبعيات والجدولة.',
       isUnlocked: unlocked.includes(2),
       isCompleted: isStage2Completed,
-      lockReason: 'أكمل جميع خطوات المرحلة الأولى (التعلم الموجّه) لفتح هذا التحدي.',
-      progressInfo: isStage2Completed ? 'تم اجتياز التحدي بنجاح' : 'جاهز للتحدي',
+      lockReason: 'أكمل جميع خطوات المرحلة الأولى أو ادخل مباشرة للتحدي.',
+      progressInfo: isStage2Completed ? 'تم اجتياز التحدي بنجاح' : unlocked.includes(2) ? 'جاهز للتحدي' : 'متاح للدخول',
       actionLabel: isStage2Completed ? 'إعادة التحدي' : 'ابدأ التحدي المستقل',
     },
     {
@@ -66,8 +70,8 @@ export const StageSelectorScreen: React.FC = () => {
       description: 'حرية كاملة لإدارة مشروع المسرحية المدرسية بأدوات محاكي GANT؛ اضبط التواريخ والمدد والموارد واختبر مختلف سيناريوهات التخطيط.',
       isUnlocked: unlocked.includes(3),
       isCompleted: profile.stage3Completed,
-      lockReason: 'اجتز المرحلة الثانية (التحدي المستقل) لفتح الإدارة الحرة للمشروع.',
-      progressInfo: unlocked.includes(3) ? 'مفتوح للإدارة' : 'مقفل',
+      lockReason: 'اجتز المرحلة الثانية أو ادخل مباشرة للإدارة الحرة.',
+      progressInfo: profile.stage3Completed ? 'مكتملة بنجاح' : unlocked.includes(3) ? 'مفتوح للإدارة' : 'متاح للدخول',
       actionLabel: 'دخول الإدارة الحرة',
     },
   ];
@@ -167,20 +171,19 @@ export const StageSelectorScreen: React.FC = () => {
                 </div>
 
                 <div className="pt-2">
-                  {item.isUnlocked ? (
-                    <button
-                      onClick={() => selectStage(item.stage)}
-                      className="w-full py-2 bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] text-white font-bold text-xs rounded-xs transition-colors shadow-xs flex items-center justify-center gap-1.5 cursor-pointer border border-[#1D4ED8]"
-                    >
-                      <span>{item.actionLabel}</span>
-                      <Play className="w-3 h-3 fill-white" />
-                    </button>
-                  ) : (
-                    <div className="p-2 bg-[#F1F5F9] rounded-xs border border-[#E2E8F0] text-[10px] text-[#64748B] text-center flex items-center justify-center gap-1.5">
-                      <Lock className="w-3 h-3 shrink-0" />
-                      <span>{item.lockReason}</span>
-                    </div>
-                  )}
+                  <button
+                    onClick={() => selectStage(item.stage)}
+                    className={`w-full py-2 font-bold text-xs rounded-xs transition-colors shadow-xs flex items-center justify-center gap-1.5 cursor-pointer border ${
+                      item.isCompleted
+                        ? 'bg-[#10B981] hover:bg-[#059669] text-white border-[#059669]'
+                        : item.isUnlocked
+                        ? 'bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] text-white border-[#1D4ED8]'
+                        : 'bg-[#475569] hover:bg-[#334155] text-white border-[#334155]'
+                    }`}
+                  >
+                    <span>{item.actionLabel}</span>
+                    <Play className="w-3 h-3 fill-white" />
+                  </button>
                 </div>
               </div>
             </div>

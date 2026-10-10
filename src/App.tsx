@@ -22,7 +22,6 @@ const ResourcesModal = lazy(() => import('./components/modals/ResourcesModal').t
 const AboutModal = lazy(() => import('./components/modals/AboutModal').then(m => ({ default: m.AboutModal })));
 const BeeAssistantPanel = lazy(() => import('./components/assistant/BeeAssistantPanel').then(m => ({ default: m.BeeAssistantPanel })));
 const StageAssistantWidget = lazy(() => import('./components/assistant/StageAssistantWidget').then(m => ({ default: m.StageAssistantWidget })));
-const InteractiveOnboardingTour = lazy(() => import('./components/assistant/InteractiveOnboardingTour').then(m => ({ default: m.InteractiveOnboardingTour })));
 const StepDetailModal = lazy(() => import('./components/assistant/StepDetailModal').then(m => ({ default: m.StepDetailModal })));
 import { BarChart3, Users, Calendar, Layers, Sparkles, User } from 'lucide-react';
 
@@ -45,7 +44,6 @@ function GanttAppContent() {
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
-  const [isTourOpen, setIsTourOpen] = useState(false);
   const [isStepDetailOpen, setIsStepDetailOpen] = useState(false);
 
   // Synchronized scrolling between TaskTable and GanttChart
@@ -111,17 +109,6 @@ function GanttAppContent() {
     };
   }, [isDraggingSplitter, setViewSettings, viewSettings.language]);
 
-  // Auto-launch guided onboarding tour on first entry to Stage 1 if student hasn't completed any steps yet
-  useEffect(() => {
-    if (profile.currentStage === 1 && profile.appScreen === 'workspace') {
-      const hasSeenTour = sessionStorage.getItem('gant_has_seen_tour_v1');
-      if (!hasSeenTour && profile.completedTutorialSteps.length === 0) {
-        setIsTourOpen(true);
-        sessionStorage.setItem('gant_has_seen_tour_v1', 'true');
-      }
-    }
-  }, [profile.currentStage, profile.appScreen, profile.completedTutorialSteps.length]);
-
   // 1. Initial Screen: Welcome Screen
   if (profile.appScreen === 'welcome') {
     return <WelcomeScreen />;
@@ -156,7 +143,6 @@ function GanttAppContent() {
         onOpenResources={() => setIsResourcesOpen(true)}
         onOpenAssistant={() => setIsAssistantOpen(true)}
         onOpenAbout={() => setIsAboutOpen(true)}
-        onOpenTour={() => setIsTourOpen(true)}
       />
 
       {/* 2. Toolbar */}
@@ -284,7 +270,6 @@ function GanttAppContent() {
 
       {/* 6. Live Pedagogical Assistant Dock */}
       <StageAssistantWidget
-        onOpenTour={() => setIsTourOpen(true)}
         onOpenAssistant={() => setIsAssistantOpen(true)}
         onOpenProjectProps={() => setIsProjectPropsOpen(true)}
         onOpenTaskProps={() => setIsTaskPropsOpen(true)}
@@ -336,13 +321,6 @@ function GanttAppContent() {
           isOpen={isStepDetailOpen}
           onClose={() => setIsStepDetailOpen(false)}
           stepIndex={profile.tutorialStepIndex}
-        />
-
-        <InteractiveOnboardingTour
-          isOpen={isTourOpen}
-          onClose={() => setIsTourOpen(false)}
-          onOpenProjectProps={() => setIsProjectPropsOpen(true)}
-          onOpenTaskProps={() => setIsTaskPropsOpen(true)}
         />
       </Suspense>
     </div>

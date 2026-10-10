@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "Metadata for a project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "organization": { "type": "string" },
+        "startDate": { "type": "string", "format": "date" }
+      },
+      "required": ["id", "name", "startDate"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A single project task",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "projectId": { "type": "string" },
+        "progress": { "type": "number" }
+      },
+      "required": ["id", "name", "projectId"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Project documents"
+    },
+    "/projects/{projectId}/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Task documents"
+    }
+  }
+}

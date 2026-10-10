@@ -196,23 +196,47 @@ export const StageAssistantWidget: React.FC<StageAssistantWidgetProps> = ({ onOp
               </div>
 
               {/* Step Dots Ribbon */}
-              <div className="flex items-center justify-between gap-0.5">
-                {TUTORIAL_STEPS.map((st, i) => (
-                  <button
-                    key={st.id}
-                    onClick={() => setTutorialStep(i)}
-                    className={`w-4 h-4 text-[9px] font-mono rounded-xs font-bold transition-all cursor-pointer ${
-                      i === stepIdx
-                        ? 'bg-[#2563EB] text-white ring-1 ring-[#1D4ED8] scale-110'
-                        : profile.completedTutorialSteps.includes(i)
-                        ? 'bg-[#10B981] text-white'
-                        : 'bg-[#E2E8F0] text-[#64748B] hover:bg-[#CBD5E1]'
-                    }`}
-                    title={`خطوة ${i + 1}: ${st.title}`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
+              <div className="flex items-center justify-between gap-1">
+                {TUTORIAL_STEPS.map((st, i) => {
+                  const isActive = i === stepIdx;
+                  const isCompleted = profile.completedTutorialSteps.includes(i);
+                  const isMet = st.validate(state, computedTasks);
+
+                  let buttonClass = '';
+                  let titleDesc = `الخطوة ${i + 1}: ${st.title}`;
+
+                  if (isActive) {
+                    if (isMet || isCompleted) {
+                      buttonClass = 'bg-[#10B981] text-white ring-2 ring-[#059669] scale-105 shadow-xs font-bold';
+                      titleDesc += ' (مستوفاة ومكتملة ✓ — الخطوة المحددة)';
+                    } else {
+                      buttonClass = 'bg-[#2563EB] text-white ring-2 ring-[#1D4ED8] scale-105 shadow-xs font-bold';
+                      titleDesc += ' (قيد التنفيذ ⏳ — الخطوة المحددة)';
+                    }
+                  } else {
+                    if (isCompleted || isMet) {
+                      buttonClass = 'bg-[#10B981] hover:bg-[#059669] text-white font-bold';
+                      titleDesc += ' (مكتملة ومستوفاة ✓)';
+                    } else {
+                      buttonClass = 'bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#334155] font-semibold hover:text-[#2563EB]';
+                      titleDesc += ' (انقر للانتقال لهذه الخطوة)';
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={st.id}
+                      onClick={() => setTutorialStep(i)}
+                      className={`flex-1 py-1 text-[10px] font-mono rounded-xs transition-all cursor-pointer flex items-center justify-center gap-0.5 ${buttonClass}`}
+                      title={titleDesc}
+                    >
+                      <span>{i + 1}</span>
+                      {(isCompleted || isMet) && (
+                        <span className="text-[8px] leading-none">✓</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* 2.5D Full Body Mascot Card with Live Pedagogical Guidance */}
@@ -296,16 +320,32 @@ export const StageAssistantWidget: React.FC<StageAssistantWidgetProps> = ({ onOp
                   <span>{showHint ? 'إخفاء التلميح' : 'أحتاج تلميحًا'}</span>
                 </button>
 
-                <div className="flex items-center gap-1.5">
-                  {stepIdx > 0 && (
-                    <button
-                      onClick={previousTutorialStep}
-                      className="px-2 py-1 rounded-xs bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#334155] text-xs font-semibold cursor-pointer border border-[#CBD5E1]"
-                      title="الخطوة السابقة"
-                    >
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={previousTutorialStep}
+                    disabled={stepIdx === 0}
+                    className={`px-2 py-1 rounded-xs text-xs font-semibold border transition-colors ${
+                      stepIdx > 0
+                        ? 'bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#334155] border-[#CBD5E1] cursor-pointer'
+                        : 'opacity-35 cursor-not-allowed text-[#94A3B8] border-[#E2E8F0]'
+                    }`}
+                    title="الخطوة السابقة"
+                  >
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={advanceTutorialStep}
+                    disabled={stepIdx === 9}
+                    className={`px-2 py-1 rounded-xs text-xs font-semibold border transition-colors ${
+                      stepIdx < 9
+                        ? 'bg-[#E2E8F0] hover:bg-[#CBD5E1] text-[#334155] border-[#CBD5E1] cursor-pointer'
+                        : 'opacity-35 cursor-not-allowed text-[#94A3B8] border-[#E2E8F0]'
+                    }`}
+                    title="الخطوة التالية"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                  </button>
 
                   <button
                     onClick={completeCurrentTutorialStep}
@@ -314,10 +354,14 @@ export const StageAssistantWidget: React.FC<StageAssistantWidgetProps> = ({ onOp
                         ? 'bg-[#10B981] hover:bg-[#059669] text-white shadow-xs'
                         : 'bg-[#F59E0B] hover:bg-[#D97706] text-white'
                     }`}
-                    title={isStepValid ? 'الانتقال للخطوة التالية' : 'تحقق من اكتمال الخطوة'}
+                    title={isStepValid ? 'تأكيد إكمال الخطوة والتقدم' : 'تحقق من اكتمال الخطوة'}
                   >
-                    <span>{isStepValid ? (stepIdx === 9 ? 'إكمال المرحلة والانتقال للمراحل 🎉' : 'الخطوة التالية') : 'تحقق من الخطوة'}</span>
-                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>
+                      {isStepValid
+                        ? (stepIdx === 9 ? 'إنهاء المرحلة 1 🎉' : 'إكمال الخطوة والتقدم ✓')
+                        : 'تحقق من الخطوة'}
+                    </span>
+                    {isStepValid ? <Check className="w-3.5 h-3.5" /> : <ArrowLeft className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
@@ -517,6 +561,7 @@ export const StageAssistantWidget: React.FC<StageAssistantWidgetProps> = ({ onOp
               {TUTORIAL_STEPS.map((st, i) => {
                 const isCompleted = profile.completedTutorialSteps.includes(i);
                 const isCurrent = i === stepIdx;
+                const isMet = st.validate(state, computedTasks);
                 return (
                   <div
                     key={st.id}
@@ -526,8 +571,8 @@ export const StageAssistantWidget: React.FC<StageAssistantWidgetProps> = ({ onOp
                     }}
                     className={`p-3 rounded border cursor-pointer transition-all flex items-start gap-3 ${
                       isCurrent
-                        ? 'bg-blue-50 border-blue-400 shadow-xs'
-                        : isCompleted
+                        ? (isMet ? 'bg-emerald-50 border-emerald-400 shadow-xs ring-1 ring-emerald-300' : 'bg-blue-50 border-blue-400 shadow-xs ring-1 ring-blue-300')
+                        : (isCompleted || isMet)
                         ? 'bg-emerald-50/50 border-emerald-300'
                         : 'bg-[#F8FAFC] border-[#CBD5E1] hover:border-[#2563EB]'
                     }`}
@@ -535,8 +580,8 @@ export const StageAssistantWidget: React.FC<StageAssistantWidgetProps> = ({ onOp
                     <div
                       className={`w-6 h-6 rounded-full font-bold flex items-center justify-center shrink-0 text-xs font-mono ${
                         isCurrent
-                          ? 'bg-[#2563EB] text-white'
-                          : isCompleted
+                          ? (isMet ? 'bg-[#10B981] text-white' : 'bg-[#2563EB] text-white')
+                          : (isCompleted || isMet)
                           ? 'bg-[#10B981] text-white'
                           : 'bg-[#E2E8F0] text-[#64748B]'
                       }`}
@@ -548,9 +593,13 @@ export const StageAssistantWidget: React.FC<StageAssistantWidgetProps> = ({ onOp
                         <strong className="text-[#0F172A] font-bold text-xs">
                           {st.title}
                         </strong>
-                        {isCompleted && (
+                        {isCompleted ? (
                           <span className="text-[10px] text-[#059669] font-bold">مكتمل ✓</span>
-                        )}
+                        ) : isMet ? (
+                          <span className="text-[10px] text-emerald-600 font-bold">مستوفى في المشروع ✓</span>
+                        ) : isCurrent ? (
+                          <span className="text-[10px] text-blue-600 font-bold">الخطوة الحالية ⏳</span>
+                        ) : null}
                       </div>
                       <p className="text-[11px] text-[#475569] leading-relaxed">
                         {st.shortInstruction}

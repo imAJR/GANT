@@ -53,7 +53,15 @@ export const BeeAssistantPanel: React.FC<BeeAssistantPanelProps> = ({
   onOpenResources,
   onOpenStepModal,
 }) => {
-  const { state, computedTasks, profile, viewSettings, advanceTutorialStep } = useProject();
+  const {
+    state,
+    computedTasks,
+    profile,
+    viewSettings,
+    advanceTutorialStep,
+    triggerHighlight,
+    selectTask,
+  } = useProject();
   const [activeTab, setActiveTab] = useState<'chat' | 'validation' | 'curriculum'>('chat');
 
   const selectedTask = computedTasks.find((t) => t.id === viewSettings.selectedTaskId) || null;
@@ -139,6 +147,17 @@ export const BeeAssistantPanel: React.FC<BeeAssistantPanelProps> = ({
     }
   };
 
+  const getActionLabel = (act: AssistantAction) => {
+    if (act.actionType === 'open_step_modal') {
+      const currentStep = TUTORIAL_STEPS[profile.tutorialStepIndex];
+      if (currentStep) {
+        return `عرض متطلبات الخطوة ${currentStep.number}: ${currentStep.title} 🧭`;
+      }
+      return 'عرض متطلبات الخطوة الحالية 🧭';
+    }
+    return act.label;
+  };
+
   const handleActionClick = (action: AssistantAction) => {
     switch (action.actionType) {
       case 'open_task_props':
@@ -156,10 +175,16 @@ export const BeeAssistantPanel: React.FC<BeeAssistantPanelProps> = ({
       case 'next_step':
         advanceTutorialStep();
         break;
-      case 'highlight':
-        // Highlight action can be dispatched or notified
+      case 'select_task':
+        if (action.taskId) {
+          selectTask(action.taskId);
+        }
         break;
+      case 'highlight':
       default:
+        if (action.targetId) {
+          triggerHighlight(action.targetId);
+        }
         break;
     }
   };
@@ -352,7 +377,7 @@ export const BeeAssistantPanel: React.FC<BeeAssistantPanelProps> = ({
                             onClick={() => handleActionClick(act)}
                             className="bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#1D4ED8] border border-[#BFDBFE] px-2 py-1 rounded font-semibold text-[11px] flex items-center gap-1 transition-all cursor-pointer"
                           >
-                            <span>{act.label}</span>
+                            <span>{getActionLabel(act)}</span>
                             <ChevronRight className="w-3 h-3" />
                           </button>
                         ))}

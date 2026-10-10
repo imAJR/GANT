@@ -77,7 +77,7 @@ export const TaskPropertiesModal: React.FC<TaskPropertiesModalProps> = ({ isOpen
       setFormPriority(currentTask.priority);
       setFormProgress(currentTask.progress);
       setFormMilestone(currentTask.milestone);
-      setFormDeadline(currentTask.deadline);
+      setFormDeadline(currentTask.deadline ?? null);
       setFormParentId(currentTask.parentId);
       setFormNotes(currentTask.notes || '');
     }

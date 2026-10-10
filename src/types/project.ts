@@ -53,7 +53,7 @@ export interface Task {
   summary?: boolean; // computed or explicit
   color?: string; // optional visual accent
   notes?: string;
-  deadline: string | null; // YYYY-MM-DD
+  deadline?: string | null; // YYYY-MM-DD
 }
 
 export interface ComputedTask extends Task {

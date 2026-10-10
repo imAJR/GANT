@@ -4,7 +4,7 @@
  * and Project Operations.
  */
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   ProjectState,
   ProjectMetadata,
@@ -50,6 +50,7 @@ interface ProjectContextValue {
   profile: StudentProfile;
   activeHighlightTargetId: string | null;
   activeTargetTaskId: string | null;
+  triggerHighlight: (targetId: string) => void;
   setStudentName: (name: string) => void;
   setAppScreen: (screen: AppScreen) => void;
   selectStage: (stage: 1 | 2 | 3) => void;
@@ -713,10 +714,9 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
 
   const selectStage = useCallback((stage: 1 | 2 | 3) => {
     setProfile((prev) => {
-      if (!prev.unlockedStages.includes(stage)) {
-        showNotification('هذه المرحلة مقفلة حالياً. أكمل المتطلبات أولاً.');
-        return prev;
-      }
+      const nextUnlocked = prev.unlockedStages.includes(stage)
+        ? prev.unlockedStages
+        : [...prev.unlockedStages, stage];
 
       // If switching to stage 1 and student has not started steps, start from tutorial baseline
       if (stage === 1 && prev.completedTutorialSteps.length === 0) {
@@ -729,6 +729,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
       return {
         ...prev,
         currentStage: stage,
+        unlockedStages: nextUnlocked,
         appScreen: 'workspace',
       };
     });
@@ -736,22 +737,11 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   }, [showNotification, state.tasks.length]);
 
   const advanceTutorialStep = useCallback(() => {
-    const currentIdx = profile.tutorialStepIndex;
-    const currentStep = TUTORIAL_STEPS[currentIdx];
-    const isAlreadyCompleted = profile.completedTutorialSteps.includes(currentIdx);
-    const isValid = currentStep ? currentStep.validate(state, computedTasks) : true;
-
-    if (!isAlreadyCompleted && !isValid) {
-      const errMsg = currentStep?.getPedagogicalError?.(state, computedTasks) || currentStep?.actionRequired || 'أكمل المطلوب أولاً.';
-      showNotification(errMsg);
-      return;
-    }
-
     setProfile((prev) => {
       const nextIndex = Math.min(9, prev.tutorialStepIndex + 1);
       return { ...prev, tutorialStepIndex: nextIndex };
     });
-  }, [profile.tutorialStepIndex, profile.completedTutorialSteps, state, computedTasks, showNotification]);
+  }, []);
 
   const previousTutorialStep = useCallback(() => {
     setProfile((prev) => {
@@ -761,15 +751,13 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setTutorialStep = useCallback((index: number) => {
-    setProfile((prev) => {
-      const maxCompleted = prev.completedTutorialSteps.length > 0 ? Math.max(...prev.completedTutorialSteps) : -1;
-      const maxAllowed = Math.max(0, maxCompleted + 1);
-      if (index <= maxAllowed || prev.completedTutorialSteps.includes(index)) {
-        return { ...prev, tutorialStepIndex: Math.max(0, Math.min(9, index)) };
-      }
-      showNotification('هذه الخطوة مقفلة حالياً. أكمل الخطوات السابقة أولاً.');
-      return prev;
-    });
+    const targetIndex = Math.max(0, Math.min(9, index));
+    setProfile((prev) => ({
+      ...prev,
+      tutorialStepIndex: targetIndex,
+    }));
+    const stepTitle = TUTORIAL_STEPS[targetIndex]?.title || '';
+    showNotification(`تم الانتقال إلى الخطوة ${targetIndex + 1}: ${stepTitle}`);
   }, [showNotification]);
 
   const completeCurrentTutorialStep = useCallback(() => {
@@ -874,8 +862,49 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     showNotification('تمت إعادة ضبط التقدم والمراحل إلى البداية بنجاح');
   }, [profile.studentName, showNotification]);
 
+  const [manualHighlightId, setManualHighlightId] = useState<string | null>(null);
+  const highlightTimeoutRef = useRef<any>(null);
+
+  const triggerHighlight = useCallback((targetId: string) => {
+    if (targetId === 'tab-resources') {
+      setProfile((prev) => ({ ...prev, activeWorkspaceTab: 'resources' }));
+    } else if (targetId.startsWith('btn-') || targetId.startsWith('row-')) {
+      setProfile((prev) => ({ ...prev, activeWorkspaceTab: 'gantt' }));
+    }
+
+    setManualHighlightId(targetId);
+
+    const targetNames: Record<string, string> = {
+      'btn-new-task': 'زر "مهمة جديدة (+)"',
+      'btn-delete-task': 'زر "حذف المهمة"',
+      'btn-indent': 'زر "تقديم المسافة البادئة (Indent)"',
+      'btn-outdent': 'زر "تأخير المسافة البادئة (Outdent)"',
+      'btn-milestone': 'زر "المعلم الرئيسي (Milestone ◆)"',
+      'btn-task-props': 'زر "خصائص المهمة"',
+      'btn-project-props': 'زر "خصائص المشروع والتقويم"',
+      'btn-autoschedule': 'زر "الجدولة التلقائية"',
+      'tab-resources': 'تبويب "الموارد وفريق العمل"',
+    };
+    const friendlyName = targetNames[targetId] || targetId;
+    showNotification(`🎯 تم تحديد ${friendlyName} في شريط الأدوات والواجهة!`);
+
+    setTimeout(() => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }, 60);
+
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
+    highlightTimeoutRef.current = setTimeout(() => {
+      setManualHighlightId(null);
+    }, 6000);
+  }, [showNotification]);
+
   const activeTutorialStep = profile.currentStage === 1 ? TUTORIAL_STEPS[profile.tutorialStepIndex] : null;
-  const activeHighlightTargetId = activeTutorialStep ? activeTutorialStep.highlightTargetId : null;
+  const activeHighlightTargetId = manualHighlightId || (activeTutorialStep ? activeTutorialStep.highlightTargetId : null);
   const activeTargetTaskId = activeTutorialStep?.targetTaskId || null;
 
   // Context value object
@@ -886,6 +915,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     profile,
     activeHighlightTargetId,
     activeTargetTaskId,
+    triggerHighlight,
     setStudentName,
     setAppScreen,
     selectStage,

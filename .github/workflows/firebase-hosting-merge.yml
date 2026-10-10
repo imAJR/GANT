@@ -18,5 +18,3 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GANT_PROJECT_MANAGER }}
           channelId: live
           projectId: gant-project-manager
-        env:
-          FIREBASE_CLI_PREVIEWS: hostingchannels

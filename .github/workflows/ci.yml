@@ -1,27 +1,44 @@
-name: GANT CI
+name: GANT CI and Firebase Deploy
 
 on:
   pull_request:
   push:
+    branches:
+      - main
 
 permissions:
   contents: read
 
 jobs:
-  verify:
+  verify-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
+
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
       - name: TypeScript check
         run: npm run lint
+
       - name: Tutorial validation tests
         run: npm test
+
       - name: Production build
         run: npm run build
+
+      - name: Deploy to Firebase Hosting
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GANT_PROJECT_MANAGER }}'
+          projectId: gant-project-manager
+          channelId: live

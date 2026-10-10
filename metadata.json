@@ -1,0 +1,8 @@
+{
+  "name": "GANT — Interactive Project Planning Simulator (النسخة الثانية)",
+  "description": "محاكي تفاعلي أصلي لتخطيط وإدارة المشروعات مستند إلى منهج التقنية الرقمية 3 (الوحدة الأولى: تخطيط المشروعات) — تصميم علي بن حامد الجبرتي 2026",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -11,10 +11,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Deploy to Firebase Hosting
+      - name: Deploy to Firebase
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GANT_PROJECT_MANAGER }}
           channelId: live
           projectId: gant-project-manager
+        env:
+          NODE_OPTIONS: "--no-deprecation"
